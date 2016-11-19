@@ -326,19 +326,28 @@ var JSTORY = (function() {
                 let currentEvents = yearsElapsed[year].events;
                 // Ensure we don't iterate over prototype members
                 for (let i = 0; i < currentEvents.length; i++) {
-                    // Reset storyHTML because we are in a new event.
-                    storyHTML = "<div class='event'>" +
-                        "<h2>" + yearsElapsed[year].year + "</h2>" +
-                        "<ul>";
-                    // Append our event information to our newly reset
-                    // storyHTML.
-                    storyHTML += "<li>Character: " + currentEvents[i].character + "</li>" +
-                        "<li>Place: " + currentEvents[i].place + "</li>" +
-                        "<li>Outcome: " + currentEvents[i].outcome + "</li>" +
-                        "<li>Popularity: " + findCharacterPopularityByName(currentEvents[i].character) + "</li>";
-                    // Fill our <ul> with story events
-                    // Fill the body with our HTML based on our story.
-                    storyElement.innerHTML += storyHTML + endStoryHTML;
+                    // Let's show the story IF the character is popular enough.
+                    // Another way to say this: "Only display the character's story
+                    // if they are popular enough to beat the RNG with their popularity
+                    // rating and it's stacked against them.'"
+                    // How will we see less popular characters than 40? Easy - the other
+                    // characters will interact with them and we'll see them there, in
+                    // the background.
+                    if(findCharacterPopularityByName(currentEvents[i].character) > getRandomRange(40, 100)) {    
+                        // Reset storyHTML because we are in a new event.
+                        storyHTML = "<div class='event'>" +
+                            "<h2>" + yearsElapsed[year].year + "</h2>" +
+                            "<ul>";
+                        // Append our event information to our newly reset
+                        // storyHTML.
+                        storyHTML += "<li>Character: " + currentEvents[i].character + "</li>" +
+                            "<li>Place: " + currentEvents[i].place + "</li>" +
+                            "<li>Outcome: " + currentEvents[i].outcome + "</li>" +
+                            "<li>Popularity: " + findCharacterPopularityByName(currentEvents[i].character) + "</li>";
+                        // Fill our <ul> with story events
+                        // Fill the body with our HTML based on our story.
+                        storyElement.innerHTML += storyHTML + endStoryHTML;
+                    }
                 }
             }
         }
