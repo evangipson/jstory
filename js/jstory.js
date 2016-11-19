@@ -28,6 +28,9 @@ var JSTORY = (function() {
          *   has: [],
          * } */
     ];
+    // We need to keep track of how many people
+    // are popular so we don't get a bloated story.
+    let popularPeople = 0;
     /* Will contain all the places in the world. */
     let places = [];
     // Functions
@@ -56,7 +59,7 @@ var JSTORY = (function() {
      */
     let createFantasyName = function() {
         // Potential first syllables
-        let firstSyl = [
+        const firstSyl = [
             "Ab", "Ac", "Ak", "Ack", "Ay", "Az", "Aw",
             "Bo", "Bi", "By",
             "Fu", "Fo",
@@ -71,7 +74,7 @@ var JSTORY = (function() {
         ];
         // Potential second syllables
         // NOTE: Not used 100% of the time.
-        let secondSyl = [
+        const secondSyl = [
             "a",
             "b",
             "di", "da",
@@ -88,7 +91,7 @@ var JSTORY = (function() {
             "z", "zi", "ze", "za"
         ];
         // Potential third syllables
-        let thirdSyl = [
+        const thirdSyl = [
             "ae",
             "bon",
             "con",
@@ -125,7 +128,7 @@ var JSTORY = (function() {
      * world.
      */
     let createPlaces = function(character) {
-        let placeTypes = [
+        const placeTypes = [
             "Desert",
             "Temple",
             "District",
@@ -142,11 +145,11 @@ var JSTORY = (function() {
             "Canyon"
         ];
         let uniqueNames = [];
-        let numberOfLocations = 30;
+        const numberOfLocations = 30;
         // Generate our unique city names
         // by slightly altering createFantasyName();
         for (let i = 0; i < numberOfLocations; i++) {
-            let chance = randomNum(100);
+            const chance = randomNum(100);
             let locationName = "";
             if (chance < 20) {
                 locationName = createFantasyName() + "ia";
@@ -171,6 +174,17 @@ var JSTORY = (function() {
     let getRandomPlace = function() {
         return places[randomNum(places.length)];
     };
+    let assignCharacterPopularity = function() {
+        let popularity = randomNum(100);
+        const popularThreshold = 80;
+        const popularLimit = 4;
+        if(popularPeople > popularLimit && popularity > popularThreshold) {
+            popularity = popularThreshold - 1;
+        } else if(popularPeople <= popularLimit && popularity > popularThreshold) {
+            popularPeople += 1;
+        }
+        return popularity;
+    };
     /**
      * Builds the createCharacters array by
      * filling it with strings that represent
@@ -181,11 +195,12 @@ var JSTORY = (function() {
     let createCharacters = function() {
         // This will probably scale with years passed
         // to make the story more "complex".
-        let numberOfCharacters = getRandomRange(4, 16);
+        const numberOfCharacters = getRandomRange(4, 16);
         for (let i = 0; i < numberOfCharacters; i++) {
             characters.push({
                 name: createFullName(),
-                place: getRandomPlace()
+                place: getRandomPlace(),
+                popularity: assignCharacterPopularity()
             });
         }
     };
@@ -210,10 +225,10 @@ var JSTORY = (function() {
         // Start this low and make the stories dense
         // and intertwined so when we jack this number
         // up we get AWESOME STORIES.
-        let timeToPass = getRandomRange(3, 5);
+        const timeToPass = getRandomRange(3, 5);
         // This will eventually be given to us by the
         // user I would think.
-        let startingYear = getRandomRange(1, 2200);
+        const startingYear = getRandomRange(1, 2200);
         // A blank event list which we'll figure out and
         // append to the events for the year.
         let eventList = [];
@@ -228,7 +243,7 @@ var JSTORY = (function() {
                     // Have some events happen, probably base this
                     // on how "popular" or "social" or "interactive"
                     // characters are
-                    let numberOfEvents = getRandomRange(0, 5);
+                    const numberOfEvents = getRandomRange(0, 5);
                     for (let j = 0; j < numberOfEvents; j++) {
                         eventList.push({
                             character: characters[character].name,
@@ -266,12 +281,12 @@ var JSTORY = (function() {
             // prototype members of this object.
             if (yearsElapsed.hasOwnProperty(year)) {
                 // Get the story element to fill up
-                let storyElement = document.getElementsByClassName("story")[0];
+                const storyElement = document.getElementsByClassName("story")[0];
                 // Start assembling the HTML to fill it with.
                 let storyHTML = "<div class='event'>" +
                     "<h2>" + yearsElapsed[year].year + "</h2>" +
                     "<ul>";
-                let endStoryHTML = "</ul>" +
+                const endStoryHTML = "</ul>" +
                     "</div>";
                 // For readability, assign our current events
                 // to a variable.
