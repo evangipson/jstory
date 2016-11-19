@@ -279,24 +279,21 @@ var JSTORY = (function() {
                 // to a variable.
                 let currentEvents = yearsElapsed[year].events;
                 for (let event in currentEvents) {
-                    // Make sure to not iterate over prototype members.
+                    // Ensure we don't iterate over prototype members
                     if (currentEvents.hasOwnProperty(event)) {
-                        // Ensure we don't iterate over prototype members
-                        if (currentEvents.hasOwnProperty(event)) {
-                            // Reset storyHTML because we are in a new event.
-                            storyHTML = "<div class='event'>" +
-                                "<h2>" + yearsElapsed[year].year + "</h2>" +
-                                "<ul>";
-                            // Append our event information to our newly reset
-                            // storyHTML.
-                            storyHTML += "<li>Character: " + currentEvents[event].character + "</li>" +
-                                "<li>Place: " + currentEvents[event].place + "</li>" +
-                                "<li>Outcome: " + currentEvents[event].outcome + "</li>";
-                        }
-                        // Fill our <ul> with story events
-                        // Fill the body with our HTML based on our story.
-                        storyElement.innerHTML += storyHTML + endStoryHTML;
+                        // Reset storyHTML because we are in a new event.
+                        storyHTML = "<div class='event'>" +
+                            "<h2>" + yearsElapsed[year].year + "</h2>" +
+                            "<ul>";
+                        // Append our event information to our newly reset
+                        // storyHTML.
+                        storyHTML += "<li>Character: " + currentEvents[event].character + "</li>" +
+                            "<li>Place: " + currentEvents[event].place + "</li>" +
+                            "<li>Outcome: " + currentEvents[event].outcome + "</li>";
                     }
+                    // Fill our <ul> with story events
+                    // Fill the body with our HTML based on our story.
+                    storyElement.innerHTML += storyHTML + endStoryHTML;
                 }
             }
         }
