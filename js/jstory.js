@@ -162,14 +162,14 @@ var JSTORY = (function() {
     }
     // Set the character's place
     places = uniqueNames;
-  }
+  };
   /**
    * Will return a random place, after you run
    * createPlaces() to generate them.
    */
   let getRandomPlace = function() {
     return places[randomNum(places.length)];
-  }
+  };
   /**
    * Builds the createCharacters array by
    * filling it with strings that represent
@@ -235,7 +235,7 @@ var JSTORY = (function() {
                   character: characters[character].name,
                   // What characters are in the same place?
                   interaction: "",
-                  // place: characterMigration() eventually
+                  // place: migrateCharacter() eventually
                   place: characters[character].place,
                   // This will need some TLC, right now it's
                   // heads and tails. This should probably be
@@ -283,21 +283,24 @@ var JSTORY = (function() {
         // to a variable.
         let currentEvents = yearsElapsed[year].events;
         for(let event in currentEvents) {
-          // Ensure we don't iterate over prototype members
-          if(currentEvents.hasOwnProperty(event)) {
-            // Reset storyHTML because we are in a new event.
-            storyHTML = "<div class='event'>" +
-              "<h2>" + yearsElapsed[year].year + "</h2>" +
-              "<ul>";
-            // Append our event information to our newly reset
-            // storyHTML.
-            storyHTML += "<li>Character: " + currentEvents[event].character + "</li>" + 
-              "<li>Place: " + currentEvents[event].place + "</li>" +
-              "<li>Outcome: " + currentEvents[event].outcome + "</li>";
-          }
-          // Fill our <ul> with story events
-          // Fill the body with our HTML based on our story.
-          storyElement.innerHTML += storyHTML + endStoryHTML;
+            // Make sure to not iterate over prototype members.
+            if(currentEvents.hasOwnProperty(event)) {
+                // Ensure we don't iterate over prototype members
+                if(currentEvents.hasOwnProperty(event)) {
+                    // Reset storyHTML because we are in a new event.
+                    storyHTML = "<div class='event'>" +
+                    "<h2>" + yearsElapsed[year].year + "</h2>" +
+                    "<ul>";
+                    // Append our event information to our newly reset
+                    // storyHTML.
+                    storyHTML += "<li>Character: " + currentEvents[event].character + "</li>" + 
+                    "<li>Place: " + currentEvents[event].place + "</li>" +
+                    "<li>Outcome: " + currentEvents[event].outcome + "</li>";
+                }
+                // Fill our <ul> with story events
+                // Fill the body with our HTML based on our story.
+                storyElement.innerHTML += storyHTML + endStoryHTML;
+            }
         }
       }
     }
@@ -319,4 +322,4 @@ var JSTORY = (function() {
 // the DOMContentLoaded event fire off.
 document.addEventListener("DOMContentLoaded", function(){
     JSTORY.next();
-})
+});
