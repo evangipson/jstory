@@ -1,4 +1,5 @@
 var JSTORY = (function() {
+    // jStory rules on ECMAScript 6!
     'use strict';
     // Module
     let jstoryModule = {};
