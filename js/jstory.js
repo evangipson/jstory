@@ -222,31 +222,29 @@ var JSTORY = (function() {
             eventList = [];
             // Pass the year for all the characters.
             for (let character in characters) {
-                // Ensure we don't iterate over prototype members
-                if (characters.hasOwnProperty(character)) {
-                    // Only pass time if the character is alive
-                    if (characterIsAlive(characters[character])) {
-                        // Have some events happen, probably base this
-                        // on how "popular" or "social" or "interactive"
-                        // characters are
-                        let numberOfEvents = getRandomRange(0, 5);
-                        for (let j = 0; j < numberOfEvents; j++) {
-                            eventList.push({
-                                character: characters[character].name,
-                                // What characters are in the same place?
-                                interaction: "",
-                                // place: migrateCharacter() eventually
-                                place: characters[character].place,
-                                // This will need some TLC, right now it's
-                                // heads and tails. This should probably be
-                                // full on sentences with consequences.
-                                outcome: randomNum(100) < 50 ? "Good" : "Bad"
-                            });
-                        }
-                    } else {
-                        // Uh oh... goodbye, sweet prince(ss).
-                        //killCharacter(characters[character]);
+                // Ensure we don't iterate over prototype members and also
+                // that our character is alive.
+                if (characters.hasOwnProperty(character) && characterIsAlive(characters[character])) {
+                    // Have some events happen, probably base this
+                    // on how "popular" or "social" or "interactive"
+                    // characters are
+                    let numberOfEvents = getRandomRange(0, 5);
+                    for (let j = 0; j < numberOfEvents; j++) {
+                        eventList.push({
+                            character: characters[character].name,
+                            // What characters are in the same place?
+                            interaction: "",
+                            // place: migrateCharacter() eventually
+                            place: characters[character].place,
+                            // This will need some TLC, right now it's
+                            // heads and tails. This should probably be
+                            // full on sentences with consequences.
+                            outcome: randomNum(100) < 50 ? "Good" : "Bad"
+                        });
                     }
+                } else if (characters.hasOwnProperty(character) && !characterIsAlive(characters[character])) {
+                    // Uh oh... goodbye, sweet prince(ss).
+                    //killCharacter(characters[character]);
                 }
             }
             // Push all of our data out to the variable
