@@ -159,7 +159,8 @@ var JSTORY = (function() {
             }
             uniqueNames.push(locationName + " " + placeTypes[randomNum(placeTypes.length)]);
         }
-        // Set the character's place
+        // Fill up the variable all the other
+        // functions can see.
         places = uniqueNames;
     };
     /**
