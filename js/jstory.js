@@ -31,6 +31,9 @@ var JSTORY = (function() {
     // We need to keep track of how many people
     // are popular so we don't get a bloated story.
     let popularPeople = 0;
+    // The threshold for a "popular" character, out
+    // of 100.
+    const popularThreshold = 80;
     /* Will contain all the places in the world. */
     let places = [];
     // Functions
@@ -174,13 +177,43 @@ var JSTORY = (function() {
     let getRandomPlace = function() {
         return places[randomNum(places.length)];
     };
+    /**
+     * Will find the character's popularity based off of a
+     * character name passed in related to an event.
+     * @param {String} A character name, usually from
+     * an event.
+     * @returns A character or null
+     */
+    let findCharacterPopularityByName = function(characterName) {
+        for(let character in characters) {
+            if(characters.hasOwnProperty(character)) {
+                if(characters[character].name === characterName) {
+                    return characters[character].popularity;
+                }
+            }
+        }
+        return null;
+    }
+    /**
+     * Handles generating the character's popularity,
+     * and also handles ensuring not too many popular
+     * characters are generated.
+     */
     let assignCharacterPopularity = function() {
         let popularity = randomNum(100);
-        const popularThreshold = 80;
         const popularLimit = 4;
+        // If we have more popular people than we want,
+        // but our generated popularity number is still higher
+        // than the threshold...
         if(popularPeople > popularLimit && popularity > popularThreshold) {
-            popularity = popularThreshold - 1;
-        } else if(popularPeople <= popularLimit && popularity > popularThreshold) {
+            // Generate new popularity value with the threshold
+            // as the maxima.
+            popularity = randomNum(popularityThreshold);
+        }
+        // If we have less popular people than we want, and this popularity
+        // rating is higher than our threshold, we have to let the rest of this
+        // program know about it by incrementing our popularPeople variable.
+        else if(popularPeople <= popularLimit && popularity > popularThreshold) {
             popularPeople += 1;
         }
         return popularity;
@@ -301,7 +334,8 @@ var JSTORY = (function() {
                     // storyHTML.
                     storyHTML += "<li>Character: " + currentEvents[i].character + "</li>" +
                         "<li>Place: " + currentEvents[i].place + "</li>" +
-                        "<li>Outcome: " + currentEvents[i].outcome + "</li>";
+                        "<li>Outcome: " + currentEvents[i].outcome + "</li>" +
+                        "<li>Popularity: " + findCharacterPopularityByName(currentEvents[i].character) + "</li>";
                     // Fill our <ul> with story events
                     // Fill the body with our HTML based on our story.
                     storyElement.innerHTML += storyHTML + endStoryHTML;
