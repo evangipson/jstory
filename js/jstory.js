@@ -10,12 +10,7 @@ var JSTORY = (function() {
     let yearsElapsed = [
         /* {
          *   year: "",
-         *   events: [
-         *     {
-         *       characters: [],
-         *       outcome: []
-         *     }
-         *   ],
+         *   events: [],
          * } */
     ];
     /* The array which represents the characters
@@ -25,11 +20,9 @@ var JSTORY = (function() {
         /* {
          *   name: "",
          *   place: "",
+         *   popularity: 0,
          *   quirks: [],
-         *   likes: [],
-         *   loves: [],
-         *   dislikes: [],
-         *   hates: [],
+         *   opinions: [],
          *   // List of items, treasures...
          *   // probably steal from the Faterator
          *   has: [],
@@ -40,19 +33,26 @@ var JSTORY = (function() {
     // Functions
     /**
      * Returns a number that is random within range.
+     * @param {Number} min
+     * @param {Number} max
+     * @returns A number in the range specified. Defaults
+     * to 0 - 100.
      */
-    let getRandomRange = function(min, max) {
+    let getRandomRange = function(min = 0, max = 100) {
         return Math.floor(Math.random() * (max - min) + min);
     };
     /**
      * Returns a number that is less than highNum.
      * Will return 0 as a minimum.
+     * @param {Number} highNum
+     * @returns A number from 0 to highNum.
      */
     let randomNum = function(highNum) {
         return Math.floor(Math.random() * parseInt(highNum));
     };
     /**
      * Return ONE name that sounds fantasy-y.
+     * @returns A fantasy sounding name.
      */
     let createFantasyName = function() {
         // Potential first syllables
@@ -114,7 +114,8 @@ var JSTORY = (function() {
         return firstSyl[randomNum(firstSyl.length)] + thirdSyl[randomNum(thirdSyl.length)];
     };
     /**
-     * Return a full name.
+     * Return a name and surname.
+     * @returns Two fantasy names joined with a space.
      */
     let createFullName = function() {
         return createFantasyName() + " " + createFantasyName();
@@ -164,6 +165,7 @@ var JSTORY = (function() {
     /**
      * Will return a random place, after you run
      * createPlaces() to generate them.
+     * @returns A string representing a place
      */
     let getRandomPlace = function() {
         return places[randomNum(places.length)];
@@ -190,6 +192,8 @@ var JSTORY = (function() {
      * Will return if character is alive or not.
      * Just returns true right now until I write
      * the aging stuff.
+     * @param {Character} character
+     * @returns character's alive status
      */
     let characterIsAlive = function(character) {
         return true;
@@ -296,12 +300,19 @@ var JSTORY = (function() {
             }
         }
     };
+    /**
+     * Creates an entirely new story.
+     */
     let nextStory = function() {
         createPlaces();
         createCharacters();
         passTime();
         writeStory();
     };
+    /**
+     * Public facing .next() function, will
+     * call the nextStory() function.
+     */
     jstoryModule.next = function() {
         nextStory();
     };
