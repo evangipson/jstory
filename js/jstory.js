@@ -353,7 +353,7 @@ var JSTORY = (function() {
                     // How will we see less popular characters than 40? Easy - the other
                     // characters will interact with them and we'll see them there, in
                     // the background.
-                    if(findCharacterPopularityByName(currentEvents[i].character) > getRandomRange(40, 100)) {    
+                    //if(findCharacterPopularityByName(currentEvents[i].character) > getRandomRange(40, 100)) {    
                         // Reset storyHTML because we are in a new event.
                         storyHTML = "<div class='event'>" +
                             "<h2>The Year " + yearsElapsed[year].year + "</h2>";
@@ -374,7 +374,7 @@ var JSTORY = (function() {
                         // Fill our <ul> with story events
                         // Fill the body with our HTML based on our story.
                         storyElement.innerHTML += storyHTML + endStoryHTML;
-                    }
+                    //}
                 }
             }
         }
