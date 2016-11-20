@@ -248,6 +248,26 @@ var JSTORY = (function() {
         return true;
     };
     /**
+     * Will return a group of characters that
+     * are at a certain place.
+     * @param {String} Character's name who you are checking against.
+     * @param {Place} The given place to look for characters
+     * @returns List of characters or null.
+     */
+    let charactersAtPlace = function(characterName, place) {
+        let charList = [];
+        for (let character in characters) {
+            if(characters.hasOwnProperty(character)) {
+                // If the character is at the place and
+                // it's not the character we are currently evaluating...
+                if(characters[character].place === place && characters[character].name != characterName) {
+                    charList.push(characters[character].name);
+                }
+            }
+        }
+        return charList.length === 0 ? null : charList;
+    };
+    /**
      * Will "pass the time" by building the
      * yearsElapsed array, filling it with strings
      * that represent years passing.
@@ -281,13 +301,13 @@ var JSTORY = (function() {
                         eventList.push({
                             character: characters[character].name,
                             // What characters are in the same place?
-                            interaction: "",
+                            interaction: charactersAtPlace(characters[character].name, characters[character].place),
                             // place: migrateCharacter() eventually
                             place: characters[character].place,
                             // This will need some TLC, right now it's
                             // heads and tails. This should probably be
                             // full on sentences with consequences.
-                            outcome: randomNum(100) < 50 ? "Good" : "Bad"
+                            outcome: randomNum(100) < 50 ? "good" : "bad"
                         });
                     }
                 } else if (characters.hasOwnProperty(character) && !characterIsAlive(characters[character])) {
@@ -329,21 +349,28 @@ var JSTORY = (function() {
                     // Let's show the story IF the character is popular enough.
                     // Another way to say this: "Only display the character's story
                     // if they are popular enough to beat the RNG with their popularity
-                    // rating and it's stacked against them.'"
+                    // rating.'"
                     // How will we see less popular characters than 40? Easy - the other
                     // characters will interact with them and we'll see them there, in
                     // the background.
                     if(findCharacterPopularityByName(currentEvents[i].character) > getRandomRange(40, 100)) {    
                         // Reset storyHTML because we are in a new event.
                         storyHTML = "<div class='event'>" +
-                            "<h2>" + yearsElapsed[year].year + "</h2>" +
-                            "<ul>";
+                            "<h2>The Year " + yearsElapsed[year].year + "</h2>";
                         // Append our event information to our newly reset
                         // storyHTML.
-                        storyHTML += "<li>Character: " + currentEvents[i].character + "</li>" +
-                            "<li>Place: " + currentEvents[i].place + "</li>" +
-                            "<li>Outcome: " + currentEvents[i].outcome + "</li>" +
-                            "<li>Popularity: " + findCharacterPopularityByName(currentEvents[i].character) + "</li>";
+                        storyHTML += "<p>" + currentEvents[i].character + " at " +
+                            currentEvents[i].place + " had a " +
+                            currentEvents[i].outcome + " experience/interaction.</p>";
+                        // Handle any interactions we had in the location.
+                        if(currentEvents[i].interaction !== null) {
+                            storyHTML += "<p>Interactions:<ul>";
+                            for(let j = 0; j < currentEvents[i].interaction.length; j++) {
+                                storyHTML += "<li>Interaction with: " + currentEvents[i].interaction[j] + "</li>";
+                            }
+                            storyHTML += "</ul></p>";
+                        }
+                        storyHTML += "<p>" + currentEvents[i].character + "'s Popularity: " + findCharacterPopularityByName(currentEvents[i].character) + "</p>";
                         // Fill our <ul> with story events
                         // Fill the body with our HTML based on our story.
                         storyElement.innerHTML += storyHTML + endStoryHTML;
