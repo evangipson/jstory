@@ -189,23 +189,19 @@ var JSTORY = (function() {
      * @returns A character or null
      */
     let findCharacterAttributeByName = function(characterName, ...attributeName) {
-        console.log("calling findCharacterAttributeByName with attributeName " + attributeName);
         for(let i = 0; i < characters.length; i++) {
             if(characters[i].name === characterName) {
                 if(attributeName.length > 1) {
                     // We have an index and an array being passed in?
                     // No problem, we can handle that!
-                    console.log("Trying to access characters[i]." + attributeName[1] +  ": " + characters[i].attributeName);
                     return characters[i][attributeName[0]][parseInt(attributeName[1])];
                 }
-                console.log("type of attributeName " + typeof characters[i][attributeName]);
                 // Otherwise, let's just return the data that was asked for.
-                console.log("Trying to access characters[i][" + attributeName +  "]: " + characters[i][attributeName]);
                 return characters[i][attributeName];
             }
         }
         return null;
-    }
+    };
     /**
      * Handles generating the character's popularity,
      * and also handles ensuring not too many popular
