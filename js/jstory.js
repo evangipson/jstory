@@ -1,5 +1,5 @@
 var JSTORY = (function() {
-    // jStory rules on ECMAScript 6!
+    // jStory runs on ECMAScript 6!
     'use strict';
     // Module
     let jstoryModule = {};
@@ -179,17 +179,29 @@ var JSTORY = (function() {
     };
     /**
      * Will find the character's popularity based off of a
-     * character name passed in related to an event.
+     * character name passed in related to an event. Takes
+     * in a parameter for attributeName, which defines the
+     * key of the object's value you'd like to retreive (ie;
+     * "popularity" or "opinions[characterName]).
      * @param {String} A character name, usually from
      * an event.
+     * @param {...String} Rest Attribute: attributeName
      * @returns A character or null
      */
-    let findCharacterPopularityByName = function(characterName) {
-        for(let character in characters) {
-            if(characters.hasOwnProperty(character)) {
-                if(characters[character].name === characterName) {
-                    return characters[character].popularity;
+    let findCharacterAttributeByName = function(characterName, ...attributeName) {
+        console.log("calling findCharacterAttributeByName with attributeName " + attributeName);
+        for(let i = 0; i < characters.length; i++) {
+            if(characters[i].name === characterName) {
+                if(attributeName.length > 1) {
+                    // We have an index and an array being passed in?
+                    // No problem, we can handle that!
+                    console.log("Trying to access characters[i]." + attributeName[1] +  ": " + characters[i].attributeName);
+                    return characters[i][attributeName[0]][parseInt(attributeName[1])];
                 }
+                console.log("type of attributeName " + typeof characters[i][attributeName]);
+                // Otherwise, let's just return the data that was asked for.
+                console.log("Trying to access characters[i][" + attributeName +  "]: " + characters[i][attributeName]);
+                return characters[i][attributeName];
             }
         }
         return null;
@@ -218,6 +230,45 @@ var JSTORY = (function() {
         }
         return popularity;
     };
+    /** 
+     * Will create a characters.length size array
+     * and fill it with -1 (for dislike), 0 (for
+     * indifferent), and 1 (for like) where each
+     * character is.
+     * @param {Integer} characterIndex
+     */
+    let createOpinionMatrix = function(characterIndex) {
+        let randomChance = getRandomRange();
+        for (let i = 0; i < characters.length; i++) {
+            // I'm counting on the characters array not changing
+            // when this is called for createOpinions, so this below
+            // statement is okay.
+            if(i !== characterIndex) {
+                if(randomChance < 33) {
+                    characters[characterIndex].opinions[i] = -1;
+                }
+                else if(randomChance < 66) {
+                    characters[characterIndex].opinions[i] = 0;
+                }
+                else {
+                    characters[characterIndex].opinions[i] = 1;
+                }
+            }
+            // The characters have an indifferent opinion of
+            // themselves.
+            else {
+                    characters[characterIndex].opinions[i] = 0;
+            }
+        }
+    };
+    let createOpinions = function() {
+        // This will probably scale with years passed
+        // to make the story more "complex".
+        const numberOfCharacters = characters.length;
+        for (let i = 0; i < numberOfCharacters; i++) {
+            createOpinionMatrix(i);
+        }
+    };
     /**
      * Builds the createCharacters array by
      * filling it with strings that represent
@@ -233,9 +284,13 @@ var JSTORY = (function() {
             characters.push({
                 name: createFullName(),
                 place: getRandomPlace(),
-                popularity: assignCharacterPopularity()
+                popularity: assignCharacterPopularity(),
+                opinions: []
             });
         }
+        // Before we create all the opinions, all
+        // the characters have to be created.
+        createOpinions();
     };
     /**
      * Will return if character is alive or not.
@@ -329,6 +384,8 @@ var JSTORY = (function() {
      * rely on some CSS style.
      */
     let writeStory = function() {
+        let randomChance = randomNum(characters.length);
+        let randomCharacterName = "";
         for (let year in yearsElapsed) {
             // Ensure we aren't iterating over
             // prototype members of this object.
@@ -353,7 +410,7 @@ var JSTORY = (function() {
                     // How will we see less popular characters than 40? Easy - the other
                     // characters will interact with them and we'll see them there, in
                     // the background.
-                    //if(findCharacterPopularityByName(currentEvents[i].character) > getRandomRange(40, 100)) {    
+                    //if(findCharacterAttributeByName(currentEvents[i].character, "popularity") > getRandomRange(40, 100)) {    
                         // Reset storyHTML because we are in a new event.
                         storyHTML = "<div class='event'>" +
                             "<h2>The Year " + yearsElapsed[year].year + "</h2>";
@@ -370,7 +427,12 @@ var JSTORY = (function() {
                             }
                             storyHTML += "</ul></p>";
                         }
-                        storyHTML += "<p>" + currentEvents[i].character + "'s Popularity: " + findCharacterPopularityByName(currentEvents[i].character) + "</p>";
+                        storyHTML += "<p>" + currentEvents[i].character + "'s Popularity: " + findCharacterAttributeByName(currentEvents[i].character, "popularity") + "</p>";
+                        // Reset our random character index and name
+                        // for generating random opinions.
+                        randomChance = randomNum(characters.length);
+                        randomCharacterName = characters[randomChance].name;
+                        storyHTML += "<p>" + currentEvents[i].character + "'s Opinion of " + randomCharacterName + ": " + findCharacterAttributeByName(currentEvents[i].character, "opinions", randomChance) + "</p>";
                         // Fill our <ul> with story events
                         // Fill the body with our HTML based on our story.
                         storyElement.innerHTML += storyHTML + endStoryHTML;
