@@ -340,10 +340,9 @@ var JSTORY = (function() {
             // Clear out our event list since it's a new year.
             eventList = [];
             // Pass the year for all the characters.
-            for (let character in characters) {
-                // Ensure we don't iterate over prototype members and also
-                // that our character is alive.
-                if (characters.hasOwnProperty(character) && characterIsAlive(characters[character])) {
+            for (let character = 0; character < characters.length; character++) {
+                // Ensure that our character is alive.
+                if (characterIsAlive(characters[character])) {
                     // Have some events happen, probably base this
                     // on how "popular" or "social" or "interactive"
                     // characters are
@@ -382,58 +381,54 @@ var JSTORY = (function() {
     let writeStory = function() {
         let randomChance = randomNum(characters.length);
         let randomCharacterName = "";
-        for (let year in yearsElapsed) {
-            // Ensure we aren't iterating over
-            // prototype members of this object.
-            if (yearsElapsed.hasOwnProperty(year)) {
-                // Get the story element to fill up
-                const storyElement = document.getElementsByClassName("story")[0];
-                // Start assembling the HTML to fill it with.
-                let storyHTML = "<div class='event'>" +
-                    "<h2>" + yearsElapsed[year].year + "</h2>" +
-                    "<ul>";
-                const endStoryHTML = "</ul>" +
-                    "</div>";
-                // For readability, assign our current events
-                // to a variable.
-                let currentEvents = yearsElapsed[year].events;
-                // Ensure we don't iterate over prototype members
-                for (let i = 0; i < currentEvents.length; i++) {
-                    // Let's show the story IF the character is popular enough.
-                    // Another way to say this: "Only display the character's story
-                    // if they are popular enough to beat the RNG with their popularity
-                    // rating.'"
-                    // How will we see less popular characters than 40? Easy - the other
-                    // characters will interact with them and we'll see them there, in
-                    // the background.
-                    //if(findCharacterAttributeByName(currentEvents[i].character, "popularity") > getRandomRange(40, 100)) {    
-                        // Reset storyHTML because we are in a new event.
-                        storyHTML = "<div class='event'>" +
-                            "<h2>The Year " + yearsElapsed[year].year + "</h2>";
-                        // Append our event information to our newly reset
-                        // storyHTML.
-                        storyHTML += "<p>" + currentEvents[i].character + " at " +
-                            currentEvents[i].place + " had a " +
-                            currentEvents[i].outcome + " experience/interaction.</p>";
-                        // Handle any interactions we had in the location.
-                        if(currentEvents[i].interaction !== null) {
-                            storyHTML += "<p>Interactions:<ul>";
-                            for(let j = 0; j < currentEvents[i].interaction.length; j++) {
-                                storyHTML += "<li>Interaction with: " + currentEvents[i].interaction[j] + "</li>";
-                            }
-                            storyHTML += "</ul></p>";
+        for (let year = 0; year < yearsElapsed.length; year++) {
+            // Get the story element to fill up
+            const storyElement = document.getElementsByClassName("story")[0];
+            // Start assembling the HTML to fill it with.
+            let storyHTML = "<div class='event'>" +
+                "<h2>" + yearsElapsed[year].year + "</h2>" +
+                "<ul>";
+            const endStoryHTML = "</ul>" +
+                "</div>";
+            // For readability, assign our current events
+            // to a variable.
+            let currentEvents = yearsElapsed[year].events;
+            // Ensure we don't iterate over prototype members
+            for (let i = 0; i < currentEvents.length; i++) {
+                // Let's show the story IF the character is popular enough.
+                // Another way to say this: "Only display the character's story
+                // if they are popular enough to beat the RNG with their popularity
+                // rating.'"
+                // How will we see less popular characters than 40? Easy - the other
+                // characters will interact with them and we'll see them there, in
+                // the background.
+                //if(findCharacterAttributeByName(currentEvents[i].character, "popularity") > getRandomRange(40, 100)) {    
+                    // Reset storyHTML because we are in a new event.
+                    storyHTML = "<div class='event'>" +
+                        "<h2>The Year " + yearsElapsed[year].year + "</h2>";
+                    // Append our event information to our newly reset
+                    // storyHTML.
+                    storyHTML += "<p>" + currentEvents[i].character + " at " +
+                        currentEvents[i].place + " had a " +
+                        currentEvents[i].outcome + " experience/interaction.</p>";
+                    // Handle any interactions we had in the location.
+                    if(currentEvents[i].interaction !== null) {
+                        storyHTML += "<p>Interactions:<ul>";
+                        for(let j = 0; j < currentEvents[i].interaction.length; j++) {
+                            storyHTML += "<li>Interaction with: " + currentEvents[i].interaction[j] + "</li>";
                         }
-                        storyHTML += "<p>" + currentEvents[i].character + "'s Popularity: " + findCharacterAttributeByName(currentEvents[i].character, "popularity") + "</p>";
-                        // Reset our random character index and name
-                        // for generating random opinions.
-                        randomChance = randomNum(characters.length);
-                        randomCharacterName = characters[randomChance].name;
-                        storyHTML += "<p>" + currentEvents[i].character + "'s Opinion of " + randomCharacterName + ": " + findCharacterAttributeByName(currentEvents[i].character, "opinions", randomChance) + "</p>";
-                        // Fill our <ul> with story events
-                        // Fill the body with our HTML based on our story.
-                        storyElement.innerHTML += storyHTML + endStoryHTML;
-                    //}
-                }
+                        storyHTML += "</ul></p>";
+                    }
+                    storyHTML += "<p>" + currentEvents[i].character + "'s Popularity: " + findCharacterAttributeByName(currentEvents[i].character, "popularity") + "</p>";
+                    // Reset our random character index and name
+                    // for generating random opinions.
+                    randomChance = randomNum(characters.length);
+                    randomCharacterName = characters[randomChance].name;
+                    storyHTML += "<p>" + currentEvents[i].character + "'s Opinion of " + randomCharacterName + ": " + findCharacterAttributeByName(currentEvents[i].character, "opinions", randomChance) + "</p>";
+                    // Fill our <ul> with story events
+                    // Fill the body with our HTML based on our story.
+                    storyElement.innerHTML += storyHTML + endStoryHTML;
+                //}
             }
         }
     };
