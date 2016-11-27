@@ -216,7 +216,7 @@ var JSTORY = (function() {
         if(popularPeople > popularLimit && popularity > popularThreshold) {
             // Generate new popularity value with the threshold
             // as the maxima.
-            popularity = randomNum(popularityThreshold);
+            popularity = randomNum(popularThreshold);
         }
         // If we have less popular people than we want, and this popularity
         // rating is higher than our threshold, we have to let the rest of this
