@@ -405,11 +405,10 @@ var JSTORY = (function() {
                 //if(findCharacterAttributeByName(currentEvents[i].character, "popularity") > getRandomRange(40, 100)) {    
                     // Reset storyHTML because we are in a new event.
                     storyHTML = "<div class='event'>" +
-                        "<h2>The Year " + yearsElapsed[year].year + "</h2>";
+                        "<h2>" + currentEvents[i].place + ", year " + yearsElapsed[year].year + "</h2>";
                     // Append our event information to our newly reset
                     // storyHTML.
-                    storyHTML += "<p>" + currentEvents[i].character + " at " +
-                        currentEvents[i].place + " had a " +
+                    storyHTML += "<p>" + currentEvents[i].character + " had a " +
                         currentEvents[i].outcome + " experience/interaction.</p>";
                     // Handle any interactions we had in the location.
                     if(currentEvents[i].interaction !== null) {
