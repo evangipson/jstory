@@ -319,6 +319,30 @@ var JSTORY = (function() {
         return charList.length === 0 ? null : charList;
     };
     /**
+     * Will migrate a character to a new location.
+     * @param {Character} The character who will move.
+     * @returns true if the character moves, and false
+     * if the character doesn't move.
+     */
+    let migrateCharacter = function(character) {
+        /* For now let's just say if the character
+         * "wants" to move for any reason (a 5-15% chance),
+         * they should move. */
+        if(getRandomRange() < getRandomRange(5,15)) {
+            let destinationIndex = getRandomRange(0,places.length);
+            let destination = places[destinationIndex];
+            /* Ensure we have a unique desination to go to,
+            * that is, we don't want the character going to
+            * the same place they are at. */
+            while(destination === character.place) {
+                destinationIndex = getRandomRange(0,places.length);
+                destination = places[destinationIndex];
+            }
+            // Now set the character's place to the new location
+            character.place = destination;
+        }
+    };
+    /**
      * Will "pass the time" by building the
      * yearsElapsed array, filling it with strings
      * that represent years passing.
@@ -352,7 +376,6 @@ var JSTORY = (function() {
                             character: characters[character].name,
                             // What characters are in the same place?
                             interaction: charactersAtPlace(characters[character].name, characters[character].place),
-                            // place: migrateCharacter() eventually
                             place: characters[character].place,
                             // This will need some TLC, right now it's
                             // heads and tails. This should probably be
@@ -360,6 +383,9 @@ var JSTORY = (function() {
                             outcome: randomNum(100) < 50 ? "good" : "bad"
                         });
                     }
+                    // Now let's make sure the character can
+                    // move if they want to.
+                    migrateCharacter(characters[character]);
                 } else if (characters.hasOwnProperty(character) && !characterIsAlive(characters[character])) {
                     // Uh oh... goodbye, sweet prince(ss).
                     //killCharacter(characters[character]);
