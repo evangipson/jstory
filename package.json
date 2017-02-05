@@ -1,0 +1,16 @@
+{
+  "name": "jStory",
+  "author": "Evan Gipson",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-preset-es2015": "latest",
+    "gulp": "^3.9.1",
+    "gulp-babel": "latest",
+    "gulp-concat": "latest",
+    "gulp-connect": "latest",
+    "gulp-obfuscate": "latest",
+    "gulp-sass": "latest",
+    "gulp-uglify": "latest",
+    "gulp-util": "latest"
+  }
+}
