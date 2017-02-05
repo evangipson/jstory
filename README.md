@@ -17,6 +17,8 @@ If you want a local copy of jStory, just fork the repository, and set this up in
 * JavaScript
 * CSS
 * HTML
+* [Gulp](http://gulpjs.com/)
+* [Firebase](https://firebase.google.com/)
 * [Visual Studio Code](https://code.visualstudio.com/)
 * Google Chrome
 
