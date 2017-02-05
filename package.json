@@ -8,7 +8,6 @@
     "gulp-babel": "latest",
     "gulp-concat": "latest",
     "gulp-connect": "latest",
-    "gulp-obfuscate": "latest",
     "gulp-sass": "latest",
     "gulp-uglify": "latest",
     "gulp-util": "latest"
