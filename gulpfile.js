@@ -24,7 +24,7 @@ gulp.task("begin", function() {
 });
 
 gulp.task("sass", function() {
-    gulp.src("src/sass/*.scss")
+    gulp.src("src/scss/*.scss")
     .pipe(sass({outputStyle: 'extended'})
         .on("error", sass.logError))
     .pipe(concat("style.css"))
