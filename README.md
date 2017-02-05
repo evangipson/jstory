@@ -11,7 +11,9 @@ jStory will generate you a story using javascript.
 | [License](#license) |
 
 ## Getting Started
-If you want a local copy of jStory, just fork the repository, and set this up in a folder somewhere on your computer, then open the index.html file in any browser.
+If you want a local copy of jStory, just fork the repository, and set this up in a folder somewhere on your computer. After that, run the gulpfile.js to build the JavaScript and the SCSS, then you can use the index.html to view the web page.
+
+You will have to create a new Firebase database and upload new configuration settings in jStory/src/js/db.js if you'd like to detach from the main database.
 
 ## Built With
 * JavaScript
