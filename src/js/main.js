@@ -301,22 +301,68 @@ var JSTORY = (function() {
     /**
      * Will return a group of characters that
      * are at a certain place.
-     * @param {String} Character's name who you are checking against.
      * @param {Place} The given place to look for characters
      * @returns List of characters or null.
      */
-    let charactersAtPlace = function(characterName, place) {
+    let charactersAtPlace = function(place) {
         let charList = [];
         for (let character in characters) {
             if(characters.hasOwnProperty(character)) {
-                // If the character is at the place and
-                // it's not the character we are currently evaluating...
-                if(characters[character].place === place && characters[character].name != characterName) {
+                // If the character is at the place, add it
+                if(characters[character].place === place) {
                     charList.push(characters[character].name);
                 }
             }
         }
         return charList.length === 0 ? null : charList;
+    };
+    /**
+     * Will clear all character interactions. To be
+     * used in passTime().
+     */
+    let flushCharacterRecentInteractions = function() {
+        for(let character in characters) {
+            if(characters.hasOwnProperty(character)) {
+                characters[character].recentlyInteracted = [];
+            }
+        }
+    }
+    /**
+     * Currently only runs charactersAtPlace.
+     * TODO: Makes up an interaction and deals with
+     * the consequences.
+     * @param {Place} Place which interaction happens
+     * @returns List of characters or null.
+     */
+    let generateInteraction = function(place) {
+        let characterList = charactersAtPlace(place);
+        let returnList = [];
+        /* We know that the returned characterList (if any)
+         * will have at least the character itself in that list.
+         * If we have MORE than just yourself in the list, we can
+         * possibly interact with someone. */
+        if(characterList !== null && characterList.length > 1) {
+            let targetCharacter = characterList[0];
+            // Index is 1 here because 0 would be the targetCharacter itself.
+            for(let characterIndex = 1; characterIndex < characterList.length; characterIndex++) {
+                let newCharacter = characterList[characterIndex];
+                /* Eventually base this off of the character's
+                 * opinion of the matched character...
+                 * For now, it's 1/3rd chance that there will be
+                 * an interaction with a person who shares a place
+                 * with this character. */
+                if(!targetCharacter.recentlyInteracted.includes(newCharacter) && getRandomRange() < 33) {
+                    // "Flag" that they interacted with eachother
+                    targetCharacter.recentlyInteracted.push(newCharacter);
+                    // And make sure it's reciporacated
+                    newCharacter.recentlyInteracted.push(targetCharacter);
+                    // Add our new character to our interaction list
+                    returnList.push(newCharacter);
+                }
+            }
+        }
+        // Return characters which will interact
+        return returnList;
     };
     /**
      * Will migrate a character to a new location.
@@ -363,6 +409,9 @@ var JSTORY = (function() {
         for (let i = startingYear; i < (startingYear + timeToPass); i++) {
             // Clear out our event list since it's a new year.
             eventList = [];
+            /* Make sure to flush all recent interactions so we
+             * can create new interactions. */
+            flushCharacterRecentInteractions();
             // Pass the year for all the characters.
             for (let character = 0; character < characters.length; character++) {
                 // Ensure that our character is alive.
@@ -374,8 +423,7 @@ var JSTORY = (function() {
                     for (let j = 0; j < numberOfEvents; j++) {
                         eventList.push({
                             character: characters[character].name,
-                            // What characters are in the same place?
-                            interaction: charactersAtPlace(characters[character].name, characters[character].place),
+                            interaction: generateInteraction(characters[character].place),
                             place: characters[character].place,
                             // This will need some TLC, right now it's
                             // heads and tails. This should probably be
