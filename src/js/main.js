@@ -378,7 +378,7 @@ var JSTORY = (function() {
         /* We know that the returned characterList (if any)
          * will have at least the character itself in that list,
          * so we need at least 2 entries for this interaction to work. */
-        if(characterList !== null && characterList.length > 0) {
+        if(characterList !== null && characterList.length > 1) {
             // Index is 0 here because we know that's the targetCharacter itself.
             let targetCharacter = characterList[0];
             /* Index is 1 here because we are trying to access the first character
@@ -539,7 +539,7 @@ var JSTORY = (function() {
                         "<h2>" + currentEvents[i].character.name + "</h2><hr />" +
                         "<h3>" + currentEvents[i].place + ", year " + yearsElapsed[year].year + "</h3>";
                     // Handle any interactions we had in the location.
-                    if(currentEvents[i].interaction !== null && currentEvents[i].interaction.length > 0) {
+                    if(currentEvents[i].interaction !== null && currentEvents[i].interaction.length > 1) {
                         storyHTML += "<p>" + currentEvents[i].character.name + " had a " +
                             currentEvents[i].outcome + " interaction.</p>";
                         storyHTML += "<p>Met with:</p><ul>";
