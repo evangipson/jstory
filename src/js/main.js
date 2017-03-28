@@ -253,16 +253,51 @@ var JSTORY = (function() {
             // The characters have an indifferent opinion of
             // themselves.
             else {
-                    characters[characterIndex].opinions[i] = 0;
+                characters[characterIndex].opinions[i] = 0;
             }
         }
     };
-    let createOpinions = function() {
-        // This will probably scale with years passed
-        // to make the story more "complex".
+    /**
+     * Will create a few items (or none!) for a character
+     * to have. Will also alter opinions based on the
+     * item generated.
+     * @param {Integer} characterIndex
+     */
+    let createInventory = function(characterIndex) {
+        // Generate any number of items from 0 - 5
+        const inventoryAmount = getRandomRange(0,getRandomRange(0,5));
+        for(let i = 0; i < inventoryAmount; i++) {
+            // Generate our item to place in inventory
+            const itemChance = getRandomRange();
+            let newTreasureName = "";
+            // Could be one of 4 "types", with 1 being rarer
+            if(itemChance < 33) {
+                newTreasureName = "A potion";
+            }
+            else if(itemChance < 66) {
+                newTreasureName = "A weapon";
+            }
+            else if(itemChance < 95) {
+                newTreasureName = "An artifact";
+            }
+            else {
+                newTreasureName = "Rare item";
+            }
+            // Add our treasure after we generate it
+            characters[characterIndex].inventory.push(newTreasureName);
+        }
+    };
+    /**
+     * This will probably scale with years passed
+     * to make the story more "complex", but for now
+     * will generate opinions and inventories for
+     * each character in the characters array.
+     */
+    let createOpinionsAndInventories = function() {
         const numberOfCharacters = characters.length;
         for (let i = 0; i < numberOfCharacters; i++) {
             createOpinionMatrix(i);
+            createInventory(i);
         }
     };
     /**
@@ -282,12 +317,14 @@ var JSTORY = (function() {
                 place: getRandomPlace(),
                 popularity: assignCharacterPopularity(),
                 opinions: [],
-                recentlyInteracted: []
+                recentlyInteracted: [],
+                inventory: []
             });
         }
-        // Before we create all the opinions, all
-        // the characters have to be created.
-        createOpinions();
+        /* Before we create all the opinions, all
+         * the characters have to be created.
+         * Also give each character a base inventory. */
+        createOpinionsAndInventories();
     };
     /**
      * Will return if character is alive or not.
@@ -341,7 +378,7 @@ var JSTORY = (function() {
         /* We know that the returned characterList (if any)
          * will have at least the character itself in that list,
          * so we need at least 2 entries for this interaction to work. */
-        if(characterList !== null && characterList.length > 1) {
+        if(characterList !== null && characterList.length > 0) {
             // Index is 0 here because we know that's the targetCharacter itself.
             let targetCharacter = characterList[0];
             /* Index is 1 here because we are trying to access the first character
@@ -397,6 +434,20 @@ var JSTORY = (function() {
         }
     };
     /**
+     * Will generate an interaction given a list
+     * of characters (which will contain the character
+     * itself as the first entry), or generate an
+     * "experience" without any other characters present.
+     * @param {Array} interactedCharacters 
+     */
+    let generateOutcome = function(interactedCharacters) {
+        if(interactedCharacters !== null) {
+            // Change opinions, modify inventories, etc.
+        }
+        // Change opinion of self, modify self inventory, etc.
+        return getRandomRange() < 50 ? "good" : "bad";
+    };
+    /**
      * Will "pass the time" by building the
      * yearsElapsed array, filling it with strings
      * that represent years passing.
@@ -429,14 +480,12 @@ var JSTORY = (function() {
                     // characters are
                     const numberOfEvents = getRandomRange(0, 5);
                     for (let j = 0; j < numberOfEvents; j++) {
+                        let charactersInteractedWith = generateInteraction(characters[character].place);
                         eventList.push({
-                            character: characters[character].name,
-                            interaction: generateInteraction(characters[character].place),
+                            character: characters[character],
+                            interaction: charactersInteractedWith,
                             place: characters[character].place,
-                            // This will need some TLC, right now it's
-                            // heads and tails. This should probably be
-                            // full on sentences with consequences.
-                            outcome: randomNum(100) < 50 ? "good" : "bad"
+                            outcome: generateOutcome(charactersInteractedWith)
                         });
                     }
                     // Now let's make sure the character can
@@ -484,32 +533,43 @@ var JSTORY = (function() {
                 // How will we see less popular characters than 40? Easy - the other
                 // characters will interact with them and we'll see them there, in
                 // the background.
-                //if(findCharacterAttributeByName(currentEvents[i].character, "popularity") > getRandomRange(40, 100)) {    
+                //if(findCharacterAttributeByName(currentEvents[i].character.name, "popularity") > getRandomRange(40, 100)) {    
                     // Reset storyHTML because we are in a new event.
                     storyHTML = "<div class='event'>" +
-                        "<h2>" + currentEvents[i].place + ", year " + yearsElapsed[year].year + "</h2>";
+                        "<h2>" + currentEvents[i].character.name + "</h2><hr />" +
+                        "<h3>" + currentEvents[i].place + ", year " + yearsElapsed[year].year + "</h3>";
                     // Handle any interactions we had in the location.
-                    if(currentEvents[i].interaction !== null) {
-                        storyHTML += "<p>" + currentEvents[i].character + " had a " +
+                    if(currentEvents[i].interaction !== null && currentEvents[i].interaction.length > 0) {
+                        storyHTML += "<p>" + currentEvents[i].character.name + " had a " +
                             currentEvents[i].outcome + " interaction.</p>";
-                        storyHTML += "<p>Met with:<ul>";
-                        for(let j = 0; j < currentEvents[i].interaction.length; j++) {
+                        storyHTML += "<p>Met with:</p><ul>";
+                        for(let j = 1; j < currentEvents[i].interaction.length; j++) {
                             storyHTML += "<li>" + currentEvents[i].interaction[j] + "</li>";
                         }
-                        storyHTML += "</ul></p>";
+                        storyHTML += "</ul>";
                     }
                     else {
                         // Append our event information to our newly reset
                         // storyHTML.
-                        storyHTML += "<p>" + currentEvents[i].character + " had a " +
+                        storyHTML += "<p>" + currentEvents[i].character.name + " had a " +
                             currentEvents[i].outcome + " experience.</p>";
                     }
-                    storyHTML += "<p>" + currentEvents[i].character + "'s Popularity: " + findCharacterAttributeByName(currentEvents[i].character, "popularity") + "</p>";
+                    storyHTML += "<p>" + currentEvents[i].character.name + "'s Popularity: " + findCharacterAttributeByName(currentEvents[i].character.name, "popularity") + "</p>";
                     // Reset our random character index and name
                     // for generating random opinions.
                     randomChance = randomNum(characters.length);
                     randomCharacterName = characters[randomChance].name;
-                    storyHTML += "<p>" + currentEvents[i].character + "'s Opinion of " + randomCharacterName + ": " + findCharacterAttributeByName(currentEvents[i].character, "opinions", randomChance) + "</p>";
+                    storyHTML += "<p>" + currentEvents[i].character.name + "'s Opinion of " + randomCharacterName + ": " + findCharacterAttributeByName(currentEvents[i].character.name, "opinions", randomChance) + "</p>";
+                    // Draw out our inventory
+                    for(let j = 0; j < currentEvents[i].character.inventory.length; j++) {
+                        if(j === 0) {
+                            storyHTML += "<p>" + currentEvents[i].character.name + "'s list of items:</p><ul>";
+                        }
+                        storyHTML += "<li>" + currentEvents[i].character.inventory[j] + "</li>";
+                        if(j === currentEvents[i].character.inventory.length) {
+                            storyHTML += "</ul>";
+                        }
+                    }
                     // Fill our <ul> with story events
                     // Fill the body with our HTML based on our story.
                     storyElement.innerHTML += storyHTML + endStoryHTML;
