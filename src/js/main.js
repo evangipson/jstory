@@ -28,6 +28,9 @@ var JSTORY = (function() {
          *   has: [],
          * } */
     ];
+    // A blank event list which we'll figure out and
+    // append to the events for the year.
+    let eventList = [];
     // We need to keep track of how many people
     // are popular so we don't get a bloated story.
     let popularPeople = 0;
@@ -339,15 +342,17 @@ var JSTORY = (function() {
     /**
      * Will return a group of characters that
      * are at a certain place.
-     * @param {Place} The given place to look for characters
+     * @param {Character} Character who is at the place
      * @returns List of characters or null.
      */
-    let charactersAtPlace = function(place) {
+    let charactersAlsoAtPlace = function(targetCharacter) {
         let charList = [];
         for (let character in characters) {
             if(characters.hasOwnProperty(character)) {
-                // If the character is at the place, add it
-                if(characters[character].place === place) {
+                /* If the character is at the place, add it
+                 * as long as it isn't the same character who
+                 * was passed in. */
+                if(characters[character].place === targetCharacter.place && characters[character].name !== targetCharacter.name) {
                     charList.push(characters[character]);
                 }
             }
@@ -366,24 +371,17 @@ var JSTORY = (function() {
         }
     }
     /**
-     * Currently only runs charactersAtPlace.
+     * Currently only runs charactersAlsoAtPlace.
      * TODO: Makes up an interaction and deals with
      * the consequences.
-     * @param {Place} Place which interaction happens
+     * @param {Character} Character to generate interaction for
      * @returns List of characters or null.
      */
-    let generateInteraction = function(place) {
-        let characterList = charactersAtPlace(place);
+    let generateInteraction = function(targetCharacter) {
+        let characterList = charactersAlsoAtPlace(targetCharacter, targetCharacter.place);
         let returnList = [];
-        /* We know that the returned characterList (if any)
-         * will have at least the character itself in that list,
-         * so we need at least 2 entries for this interaction to work. */
-        if(characterList !== null && characterList.length > 1) {
-            // Index is 0 here because we know that's the targetCharacter itself.
-            let targetCharacter = characterList[0];
-            /* Index is 1 here because we are trying to access the first character
-             * that isn't the targetCharacter. */
-            for(let characterIndex = 1; characterIndex < characterList.length; characterIndex++) {
+        if(characterList !== null) {
+            for(let characterIndex = 0; characterIndex < characterList.length; characterIndex++) {
                 let newCharacter = characterList[characterIndex];
                 /* TODO: Base this off of targetCharacter's opinion of newCharacter.
                  * If we haven't interacted with the newCharacter before,
@@ -404,14 +402,15 @@ var JSTORY = (function() {
     /**
      * Will migrate a character to a new location.
      * @param {Character} The character who will move.
+     * @param {Number} Year this happens.
      * @returns true if the character moves, and false
      * if the character doesn't move.
      */
-    let migrateCharacter = function(character) {
+    let migrateCharacter = function(character, year) {
         /* For now let's just say if the character
-         * "wants" to move for any reason (a 5-15% chance),
+         * "wants" to move for any reason (a 5-25% chance),
          * they should move. */
-        if(getRandomRange() < getRandomRange(5,15)) {
+        if(getRandomRange() < getRandomRange(5,25)) {
             let destinationIndex = getRandomRange(0,places.length);
             let destination = places[destinationIndex];
             /* Ensure we have a unique desination to go to,
@@ -423,6 +422,15 @@ var JSTORY = (function() {
             }
             // Now set the character's place to the new location
             character.place = destination;
+            // And create an event
+            // TODO: Write CreateEvent function to outsource and compartmentalize this logic
+            eventList.push({
+                character: character,
+                interaction: null,
+                place: destination,
+                outcome: generateOutcome(),
+                moving: true,
+            });
         }
     };
     /**
@@ -454,9 +462,6 @@ var JSTORY = (function() {
         // This will eventually be given to us by the
         // user I would think.
         const startingYear = getRandomRange(1, 2200);
-        // A blank event list which we'll figure out and
-        // append to the events for the year.
-        let eventList = [];
         for (let i = startingYear; i < (startingYear + timeToPass); i++) {
             // Clear out our event list since it's a new year.
             eventList = [];
@@ -472,7 +477,7 @@ var JSTORY = (function() {
                     // characters are
                     const numberOfEvents = getRandomRange(0, 5);
                     for (let j = 0; j < numberOfEvents; j++) {
-                        let charactersInteractedWith = generateInteraction(characters[character].place);
+                        let charactersInteractedWith = generateInteraction(characters[character]);
                         eventList.push({
                             character: characters[character],
                             interaction: charactersInteractedWith,
@@ -482,7 +487,7 @@ var JSTORY = (function() {
                     }
                     // Now let's make sure the character can
                     // move if they want to.
-                    migrateCharacter(characters[character]);
+                    migrateCharacter(characters[character], i);
                 } else if (characters.hasOwnProperty(character) && !characterIsAlive(characters[character])) {
                     // Uh oh... goodbye, sweet prince(ss).
                     //killCharacter(characters[character]);
@@ -497,6 +502,78 @@ var JSTORY = (function() {
         }
     };
     /**
+     * Will fill out the event card with some
+     * information given an eventIndex. To be
+     * used in writeStory().
+     * @param {Number} eventIndex
+     * @param {Array} currentEvents
+     * @returns {String} HTML representing event card's body
+     */
+    let renderCardBody = function(eventIndex, currentEvents) {
+        let storyHTML = "";
+        // Handle any interactions we had in the location.
+        if(currentEvents[eventIndex].interaction !== null) {
+            storyHTML += "<p>" + currentEvents[eventIndex].character.name + " had a " +
+                currentEvents[eventIndex].outcome + " interaction.</p>";
+            storyHTML += "<p>Met with:</p><ul>";
+            for(let j = 0; j < currentEvents[eventIndex].interaction.length; j++) {
+                storyHTML += "<li>" + currentEvents[eventIndex].interaction[j] + "</li>";
+            }
+            storyHTML += "</ul>";
+        }
+        // Handle any "moving" events.
+        else if(currentEvents[eventIndex].moving !== undefined) {
+            // We moved!
+            storyHTML += "<p>" + currentEvents[eventIndex].character.name + " moved and had a " + currentEvents[eventIndex].outcome + " time.</p>";
+        }
+        // Otherwise, we just had a self-experience.
+        else {
+            // Append our event information to our newly reset
+            // storyHTML.
+            storyHTML += "<p>" + currentEvents[eventIndex].character.name + " had a " +
+                currentEvents[eventIndex].outcome + " experience.</p>";        
+        }
+        // Render out popularity.
+        //storyHTML += "<p>" + currentEvents[eventIndex].character.name + "'s Popularity: " + findCharacterAttributeByName(currentEvents[eventIndex].character.name, "popularity") + "</p>";
+        // Reset our random character index and name
+        // for generating random opinions.
+        //randomChance = randomNum(characters.length);
+        //randomCharacterName = characters[randomChance].name;
+        //storyHTML += "<p>" + currentEvents[eventIndex].character.name + "'s Opinion of " + randomCharacterName + ": " + findCharacterAttributeByName(currentEvents[eventIndex].character.name, "opinions", randomChance) + "</p>";
+        // Draw out our inventory, if we have any
+        for(let j = 0; j < currentEvents[eventIndex].character.inventory.length; j++) {
+            if(j === 0) {
+                storyHTML += "<p>" + currentEvents[eventIndex].character.name + "'s list of items:</p><ul>";
+            }
+            storyHTML += "<li>" + currentEvents[eventIndex].character.inventory[j] + "</li>";
+            if(j === currentEvents[eventIndex].character.inventory.length) {
+                storyHTML += "</ul>";
+            }
+        }
+        return storyHTML;
+    }
+    /**
+     * Will generate HTML for an event's title given
+     * any year and eventIndex. To be used in
+     * writeStory().
+     * @param {Number} eventIndex
+     * @param {Array} currentEvents
+     * @param {Number} year
+     * @returns HTML for Card Title
+     */
+    let renderCardTitle = function(eventIndex, currentEvents, year) {
+        // Reset storyHTML because we are in a new event.
+        let storyHTML = "<div class='event'>";
+        if(currentEvents[eventIndex].moving !== undefined) {
+            storyHTML += "<h2> " + currentEvents[eventIndex].character.name + " moved!</h2>";
+        }
+        else {
+            storyHTML += "<h2>" + currentEvents[eventIndex].character.name + "</h2><hr />";
+        }
+        storyHTML += "<h3>" + currentEvents[eventIndex].place + ", year " + year + "</h3>";
+        return storyHTML;
+    }
+    /**
      * Writes the story we have already created out
      * to some HTML elements which will eventually
      * rely on some CSS style.
@@ -508,9 +585,7 @@ var JSTORY = (function() {
             // Get the story element to fill up
             const storyElement = document.getElementsByClassName("story")[0];
             // Start assembling the HTML to fill it with.
-            let storyHTML = "<div class='event'>" +
-                "<h2>" + yearsElapsed[year].year + "</h2>" +
-                "<ul>";
+            let storyHTML = "";
             const endStoryHTML = "</ul>" +
                 "</div>";
             // For readability, assign our current events
@@ -526,42 +601,8 @@ var JSTORY = (function() {
                 // characters will interact with them and we'll see them there, in
                 // the background.
                 //if(findCharacterAttributeByName(currentEvents[i].character.name, "popularity") > getRandomRange(40, 100)) {    
-                    // Reset storyHTML because we are in a new event.
-                    storyHTML = "<div class='event'>" +
-                        "<h2>" + currentEvents[i].character.name + "</h2><hr />" +
-                        "<h3>" + currentEvents[i].place + ", year " + yearsElapsed[year].year + "</h3>";
-                    // Handle any interactions we had in the location.
-                    if(currentEvents[i].interaction !== null) {
-                        storyHTML += "<p>" + currentEvents[i].character.name + " had a " +
-                            currentEvents[i].outcome + " interaction.</p>";
-                        storyHTML += "<p>Met with:</p><ul>";
-                        for(let j = 0; j < currentEvents[i].interaction.length; j++) {
-                            storyHTML += "<li>" + currentEvents[i].interaction[j] + "</li>";
-                        }
-                        storyHTML += "</ul>";
-                    }
-                    else {
-                        // Append our event information to our newly reset
-                        // storyHTML.
-                        storyHTML += "<p>" + currentEvents[i].character.name + " had a " +
-                            currentEvents[i].outcome + " experience.</p>";
-                    }
-                    storyHTML += "<p>" + currentEvents[i].character.name + "'s Popularity: " + findCharacterAttributeByName(currentEvents[i].character.name, "popularity") + "</p>";
-                    // Reset our random character index and name
-                    // for generating random opinions.
-                    randomChance = randomNum(characters.length);
-                    randomCharacterName = characters[randomChance].name;
-                    storyHTML += "<p>" + currentEvents[i].character.name + "'s Opinion of " + randomCharacterName + ": " + findCharacterAttributeByName(currentEvents[i].character.name, "opinions", randomChance) + "</p>";
-                    // Draw out our inventory
-                    for(let j = 0; j < currentEvents[i].character.inventory.length; j++) {
-                        if(j === 0) {
-                            storyHTML += "<p>" + currentEvents[i].character.name + "'s list of items:</p><ul>";
-                        }
-                        storyHTML += "<li>" + currentEvents[i].character.inventory[j] + "</li>";
-                        if(j === currentEvents[i].character.inventory.length) {
-                            storyHTML += "</ul>";
-                        }
-                    }
+                    storyHTML = renderCardTitle(i, currentEvents, yearsElapsed[year].year);
+                    storyHTML += renderCardBody(i, currentEvents);
                     // Fill our <ul> with story events
                     // Fill the body with our HTML based on our story.
                     storyElement.innerHTML += storyHTML + endStoryHTML;
