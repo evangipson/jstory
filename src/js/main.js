@@ -385,24 +385,16 @@ var JSTORY = (function() {
              * that isn't the targetCharacter. */
             for(let characterIndex = 1; characterIndex < characterList.length; characterIndex++) {
                 let newCharacter = characterList[characterIndex];
-                /* TODO: Base this off of targetCharacter's opinion of newCharacter
-                 * instead of just 33% chance. */
-                //if(getRandomRange() < 33) {
-                    /* If we have recent interactions, we don't want
-                     * to re-enact them. */
-                    if(targetCharacter.recentlyInteracted !== undefined) {
-                        /* If we haven't interacted with the newCharacter before,
-                         * make sure to "flag" that they will interact with eachother. */
-                        if(!targetCharacter.recentlyInteracted.includes(newCharacter)) {
-                            targetCharacter.recentlyInteracted.push(newCharacter);
-                            // Make sure it's reciporacated in the newCharacter's interactions.
-                            newCharacter.recentlyInteracted.push(targetCharacter);
-                        }
-                    }
-                    /* If we don't have recent interactions,
-                     * just add the newCharacter to our returnList variable. */
+                /* TODO: Base this off of targetCharacter's opinion of newCharacter.
+                 * If we haven't interacted with the newCharacter before,
+                 * make sure to "flag" that they will interact with eachother. */
+                if(targetCharacter.recentlyInteracted !== undefined && !targetCharacter.recentlyInteracted.includes(newCharacter)) {
+                    targetCharacter.recentlyInteracted.push(newCharacter);
+                    // Make sure it's reciporacated in the newCharacter's interactions.
+                    newCharacter.recentlyInteracted.push(targetCharacter);
+                    // Add the newCharacter to our returnList variable.
                     returnList.push(newCharacter.name);
-                //}
+                }
             }
         }
         /* Return null or characters which will interact
@@ -539,11 +531,11 @@ var JSTORY = (function() {
                         "<h2>" + currentEvents[i].character.name + "</h2><hr />" +
                         "<h3>" + currentEvents[i].place + ", year " + yearsElapsed[year].year + "</h3>";
                     // Handle any interactions we had in the location.
-                    if(currentEvents[i].interaction !== null && currentEvents[i].interaction.length > 1) {
+                    if(currentEvents[i].interaction !== null) {
                         storyHTML += "<p>" + currentEvents[i].character.name + " had a " +
                             currentEvents[i].outcome + " interaction.</p>";
                         storyHTML += "<p>Met with:</p><ul>";
-                        for(let j = 1; j < currentEvents[i].interaction.length; j++) {
+                        for(let j = 0; j < currentEvents[i].interaction.length; j++) {
                             storyHTML += "<li>" + currentEvents[i].interaction[j] + "</li>";
                         }
                         storyHTML += "</ul>";
