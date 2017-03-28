@@ -281,7 +281,8 @@ var JSTORY = (function() {
                 name: createFullName(),
                 place: getRandomPlace(),
                 popularity: assignCharacterPopularity(),
-                opinions: []
+                opinions: [],
+                recentlyInteracted: []
             });
         }
         // Before we create all the opinions, all
@@ -310,7 +311,7 @@ var JSTORY = (function() {
             if(characters.hasOwnProperty(character)) {
                 // If the character is at the place, add it
                 if(characters[character].place === place) {
-                    charList.push(characters[character].name);
+                    charList.push(characters[character]);
                 }
             }
         }
@@ -338,31 +339,38 @@ var JSTORY = (function() {
         let characterList = charactersAtPlace(place);
         let returnList = [];
         /* We know that the returned characterList (if any)
-         * will have at least the character itself in that list.
-         * If we have MORE than just yourself in the list, we can
-         * possibly interact with someone. */
+         * will have at least the character itself in that list,
+         * so we need at least 2 entries for this interaction to work. */
         if(characterList !== null && characterList.length > 1) {
+            // Index is 0 here because we know that's the targetCharacter itself.
             let targetCharacter = characterList[0];
-            // Index is 1 here because 0 would be the targetCharacter itself.
+            /* Index is 1 here because we are trying to access the first character
+             * that isn't the targetCharacter. */
             for(let characterIndex = 1; characterIndex < characterList.length; characterIndex++) {
                 let newCharacter = characterList[characterIndex];
-                /* Eventually base this off of the character's
-                 * opinion of the matched character...
-                 * For now, it's 1/3rd chance that there will be
-                 * an interaction with a person who shares a place
-                 * with this character. */
-                if(!targetCharacter.recentlyInteracted.includes(newCharacter) && getRandomRange() < 33) {
-                    // "Flag" that they interacted with eachother
-                    targetCharacter.recentlyInteracted.push(newCharacter);
-                    // And make sure it's reciporacated
-                    newCharacter.recentlyInteracted.push(targetCharacter);
-                    // Add our new character to our interaction list
-                    returnList.push(newCharacter);
-                }
+                /* TODO: Base this off of targetCharacter's opinion of newCharacter
+                 * instead of just 33% chance. */
+                //if(getRandomRange() < 33) {
+                    /* If we have recent interactions, we don't want
+                     * to re-enact them. */
+                    if(targetCharacter.recentlyInteracted !== undefined) {
+                        /* If we haven't interacted with the newCharacter before,
+                         * make sure to "flag" that they will interact with eachother. */
+                        if(!targetCharacter.recentlyInteracted.includes(newCharacter)) {
+                            targetCharacter.recentlyInteracted.push(newCharacter);
+                            // Make sure it's reciporacated in the newCharacter's interactions.
+                            newCharacter.recentlyInteracted.push(targetCharacter);
+                        }
+                    }
+                    /* If we don't have recent interactions,
+                     * just add the newCharacter to our returnList variable. */
+                    returnList.push(newCharacter.name);
+                //}
             }
         }
-        // Return characters which will interact
-        return returnList;
+        /* Return null or characters which will interact
+         * with the targetCharacter. */
+        return returnList.length === 0 ? null : returnList;
     };
     /**
      * Will migrate a character to a new location.
@@ -480,17 +488,21 @@ var JSTORY = (function() {
                     // Reset storyHTML because we are in a new event.
                     storyHTML = "<div class='event'>" +
                         "<h2>" + currentEvents[i].place + ", year " + yearsElapsed[year].year + "</h2>";
-                    // Append our event information to our newly reset
-                    // storyHTML.
-                    storyHTML += "<p>" + currentEvents[i].character + " had a " +
-                        currentEvents[i].outcome + " experience/interaction.</p>";
                     // Handle any interactions we had in the location.
                     if(currentEvents[i].interaction !== null) {
-                        storyHTML += "<p>Interactions:<ul>";
+                        storyHTML += "<p>" + currentEvents[i].character + " had a " +
+                            currentEvents[i].outcome + " interaction.</p>";
+                        storyHTML += "<p>Met with:<ul>";
                         for(let j = 0; j < currentEvents[i].interaction.length; j++) {
-                            storyHTML += "<li>Interaction with: " + currentEvents[i].interaction[j] + "</li>";
+                            storyHTML += "<li>" + currentEvents[i].interaction[j] + "</li>";
                         }
                         storyHTML += "</ul></p>";
+                    }
+                    else {
+                        // Append our event information to our newly reset
+                        // storyHTML.
+                        storyHTML += "<p>" + currentEvents[i].character + " had a " +
+                            currentEvents[i].outcome + " experience.</p>";
                     }
                     storyHTML += "<p>" + currentEvents[i].character + "'s Popularity: " + findCharacterAttributeByName(currentEvents[i].character, "popularity") + "</p>";
                     // Reset our random character index and name
